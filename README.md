@@ -10,7 +10,7 @@ Plugin in iOS is in swift
 
 Plugin in Android is in Kotlin
 
-**This plugin used native app lifeCycles instead of flutter's to ensure it works when flutter entered a native view (eg: from a native plugin)**
+**This plugin uses native UIApplication and UIScene lifecycle events instead of Flutter's to ensure it works when Flutter enters a native view (for example, from a native plugin).**
 
 This plugin also provides a native life cycle listener through `instance.appLifeCycleEvents` stream
 

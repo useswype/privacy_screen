@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 
-public class PrivacyScreenPlugin: NSObject, FlutterPlugin {
+public class PrivacyScreenPlugin: NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate {
     
     var enablePrivacy = false
     var lockWithDidEnterBackground = true
@@ -26,6 +26,7 @@ public class PrivacyScreenPlugin: NSObject, FlutterPlugin {
         methodChannel = FlutterMethodChannel(name: "channel.couver.privacy_screen", binaryMessenger: registrar.messenger())
         super.init()
         registrar.addApplicationDelegate(self)
+        registrar.addSceneDelegate(self)
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -33,9 +34,9 @@ public class PrivacyScreenPlugin: NSObject, FlutterPlugin {
         registrar.addMethodCallDelegate(instance, channel: instance.methodChannel)
     }
     
-    private func createPrivacyView() {
+    private func createPrivacyView(in window: UIWindow?) {
         
-        if let window = UIApplication.shared.keyWindow {
+        if let window {
             dismissPrivacyView()
             privacyUIView = UIView(frame: window.bounds);
             privacyUIView?.alpha = 0.0
@@ -112,25 +113,35 @@ public class PrivacyScreenPlugin: NSObject, FlutterPlugin {
         timeEnteredBackground = 0
         
     }
-    
-    
-    public func applicationDidBecomeActive(_ application: UIApplication) {
+
+    private func window(for scene: UIScene) -> UIWindow? {
+        guard let windowScene = scene as? UIWindowScene else {
+            return nil
+        }
+        return windowScene.windows.first(where: \.isKeyWindow) ?? windowScene.windows.first
+    }
+
+    private func applicationWindow() -> UIWindow? {
+        registrar.viewController?.view.window ?? UIApplication.shared.delegate?.window ?? nil
+    }
+
+    private func handleDidBecomeActive() {
         methodChannel.invokeMethod("onLifeCycle", arguments: "applicationDidBecomeActive")
         judgeLock()
     }
-    
-    public func applicationDidEnterBackground(_ application: UIApplication) {
+
+    private func handleDidEnterBackground() {
         if(lockWithDidEnterBackground) {
             timeEnteredBackground = NSDate().timeIntervalSince1970
         }
         methodChannel.invokeMethod("onLifeCycle", arguments: "applicationDidEnterBackground")
     }
-    
-    public func applicationWillEnterForeground(_ application: UIApplication) {
+
+    private func handleWillEnterForeground() {
         methodChannel.invokeMethod("onLifeCycle", arguments: "applicationWillEnterForeground")
     }
-    
-    public func applicationWillResignActive(_ application: UIApplication) {
+
+    private func handleWillResignActive(window: UIWindow?) {
         if(!lockWithDidEnterBackground) {
             timeEnteredBackground = NSDate().timeIntervalSince1970
         }
@@ -138,11 +149,43 @@ public class PrivacyScreenPlugin: NSObject, FlutterPlugin {
         if ( enablePrivacy ) {
             self.registerBackgroundTask()
             UIApplication.shared.ignoreSnapshotOnNextApplicationLaunch()
-            createPrivacyView()
+            createPrivacyView(in: window)
             self.endBackgroundTask()
         }
     }
-    
+
+    public func applicationDidBecomeActive(_ application: UIApplication) {
+        handleDidBecomeActive()
+    }
+
+    public func applicationDidEnterBackground(_ application: UIApplication) {
+        handleDidEnterBackground()
+    }
+
+    public func applicationWillEnterForeground(_ application: UIApplication) {
+        handleWillEnterForeground()
+    }
+
+    public func applicationWillResignActive(_ application: UIApplication) {
+        handleWillResignActive(window: applicationWindow())
+    }
+
+    public func sceneDidBecomeActive(_ scene: UIScene) {
+        handleDidBecomeActive()
+    }
+
+    public func sceneDidEnterBackground(_ scene: UIScene) {
+        handleDidEnterBackground()
+    }
+
+    public func sceneWillEnterForeground(_ scene: UIScene) {
+        handleWillEnterForeground()
+    }
+
+    public func sceneWillResignActive(_ scene: UIScene) {
+        handleWillResignActive(window: window(for: scene))
+    }
+
     func registerBackgroundTask() {
         self.backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
             self?.endBackgroundTask()

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'privacy_screen'
-  s.version          = '0.0.9'
+  s.version          = '0.0.10'
   s.summary          = 'Protects sensitive app content in the app switcher and background.'
   s.description      = <<-DESC
 A Flutter plugin for privacy screens, screenshot protection, and native lifecycle lock triggers.
