@@ -1,6 +1,6 @@
-# This plugin is no longer maintained
+# Maintained by Swypex
 
-This plugin is no longer maintained. Please use at your own risk.
+This fork is maintained by [Swypex](https://github.com/useswype).
 
 # privacy_screen
 
@@ -35,17 +35,26 @@ This plugin also provides a native life cycle listener through `instance.appLife
 
 ## IOS
 
-<img src="https://github.com/eddyuan/privacy_screen/blob/master/screen_shots/ios_0.gif?raw=true" height="400" /><img src="https://github.com/eddyuan/privacy_screen/blob/master/screen_shots/ios_1.png?raw=true" height="400" /><img src="https://github.com/eddyuan/privacy_screen/blob/master/screen_shots/ios_2.png?raw=true" height="400" />
+<img src="https://github.com/useswype/privacy_screen/blob/master/screen_shots/ios_0.gif?raw=true" height="400" /><img src="https://github.com/useswype/privacy_screen/blob/master/screen_shots/ios_1.png?raw=true" height="400" /><img src="https://github.com/useswype/privacy_screen/blob/master/screen_shots/ios_2.png?raw=true" height="400" />
 
 ## Android
 
-<img src="https://github.com/eddyuan/privacy_screen/blob/master/screen_shots/android_1.png?raw=true" height="400" /><img src="https://github.com/eddyuan/privacy_screen/blob/master/screen_shots/android_2.png?raw=true" height="400" />
+<img src="https://github.com/useswype/privacy_screen/blob/master/screen_shots/android_1.png?raw=true" height="400" /><img src="https://github.com/useswype/privacy_screen/blob/master/screen_shots/android_2.png?raw=true" height="400" />
 
 ## Usage
 
 ### Installation
 
-Add `privacy_screen` as a dependency in your `pubspec.yaml` file.
+Add `privacy_screen` as a dependency in your `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  privacy_screen:
+    git:
+      url: https://github.com/useswype/privacy_screen.git
+```
+
+iOS projects can integrate the plugin using Swift Package Manager or CocoaPods.
 
 ### Import
 
@@ -69,7 +78,7 @@ bool result = await PrivacyScreen.instance.enable(
         enableSecure: true,
         autoLockAfterSeconds: 5,
     ),
-    backgroundColor: Colors.white.withOpacity(0),
+    backgroundColor: Colors.white.withValues(alpha: 0),
     blurEffect: PrivacyBlurEffect.extraLight,
 );
 ```
@@ -88,7 +97,7 @@ Open your project's ios folder with XCode and add the image asset in the runner/
 
 The `privacyImageName` String must match the asset name, eg: `"LaunchImage"`
 
-<img src="https://github.com/eddyuan/privacy_screen/blob/master/screen_shots/xcode_setting.png?raw=true" width="100%" />
+<img src="https://github.com/useswype/privacy_screen/blob/master/screen_shots/xcode_setting.png?raw=true" width="100%" />
 
 ## To use the lock feature
 
@@ -98,7 +107,7 @@ Put `PrivacyGate` widget at your root and provide your own `lockBuilder` widget.
 
 Use it at MaterialApp's builder and provide a `navigatorKey`.
 
-By providing `navigatorKey`, the plugin will put your `lockBuilder` into a new `Route`, and you can write `WillPopScope` in your `lockBuilder` to prevent navigation once entered the lock screen.
+By providing `navigatorKey`, the plugin will put your `lockBuilder` into a new `Route`, and you can use `PopScope` in your `lockBuilder` to prevent navigation once entered the lock screen.
 
 ```dart
 // Your MaterialApp
@@ -117,9 +126,9 @@ class MyApp extends StatelessWidget {
           lockBuilder: (ctx) => const LockerPage(),
           // Give it a key
           navigatorKey: navigatorKey,
-          onLifeCycleChanged: (value) => print(value),
-          onLock: () => print("onLock"),
-          onUnlock: () => print("onUnlock"),
+          onLifeCycleChanged: (value) => debugPrint(value.name),
+          onLock: () => debugPrint("onLock"),
+          onUnlock: () => debugPrint("onUnlock"),
           child: child,
         );
       },
@@ -135,9 +144,13 @@ class LockerPage extends StatelessWidget {
   const LockerPage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        var result = await showDialog(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) {
+          return;
+        }
+        final shouldUnlock = await showDialog<bool>(
           context: context,
           builder: (ctx) => Dialog(
             child: Padding(
@@ -176,10 +189,9 @@ class LockerPage extends StatelessWidget {
             ),
           ),
         );
-        if (result == true) {
+        if (shouldUnlock ?? false) {
           PrivacyScreen.instance.unlock();
         }
-        return false;
       },
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -288,9 +300,9 @@ class MyApp extends StatelessWidget {
         return PrivacyGate(
           lockBuilder: (ctx) => const LockerPage(),
           navigatorKey: navigatorKey,
-          onLifeCycleChanged: (value) => print(value),
-          onLock: () => print("onLock"),
-          onUnlock: () => print("onUnlock"),
+          onLifeCycleChanged: (value) => debugPrint(value.name),
+          onLock: () => debugPrint("onLock"),
+          onUnlock: () => debugPrint("onUnlock"),
           child: child,
         );
       },
@@ -352,7 +364,7 @@ class _FirstRouteState extends State<FirstRoute> {
                           enableSecure: true,
                           autoLockAfterSeconds: 5,
                         ),
-                        backgroundColor: Colors.white.withOpacity(0),
+                        backgroundColor: Colors.white.withValues(alpha: 0),
                         blurEffect: PrivacyBlurEffect.extraLight,
                       );
                     },
@@ -371,7 +383,7 @@ class _FirstRouteState extends State<FirstRoute> {
                           enableSecure: true,
                           autoLockAfterSeconds: 5,
                         ),
-                        backgroundColor: Colors.white.withOpacity(0),
+                        backgroundColor: Colors.white.withValues(alpha: 0),
                         blurEffect: PrivacyBlurEffect.light,
                       );
                     },
@@ -390,7 +402,7 @@ class _FirstRouteState extends State<FirstRoute> {
                           enableSecure: true,
                           autoLockAfterSeconds: 5,
                         ),
-                        backgroundColor: Colors.red.withOpacity(0.4),
+                        backgroundColor: Colors.red.withValues(alpha: 0.4),
                         blurEffect: PrivacyBlurEffect.dark,
                       );
                     },
@@ -437,9 +449,13 @@ class LockerPage extends StatelessWidget {
   const LockerPage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        var result = await showDialog(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) {
+          return;
+        }
+        final shouldUnlock = await showDialog<bool>(
           context: context,
           builder: (ctx) => Dialog(
             child: Padding(
@@ -478,10 +494,9 @@ class LockerPage extends StatelessWidget {
             ),
           ),
         );
-        if (result == true) {
+        if (shouldUnlock ?? false) {
           PrivacyScreen.instance.unlock();
         }
-        return false;
       },
       child: Padding(
         padding: const EdgeInsets.all(16.0),

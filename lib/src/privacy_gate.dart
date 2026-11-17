@@ -121,7 +121,7 @@ class _PrivacyGateState extends State<PrivacyGate>
   void _doLock() {
     if (widget.lockBuilder != null) {
       if (widget.navigatorKey?.currentState != null) {
-        print("_toLockPage");
+        debugPrint("_toLockPage");
         _toLockPage();
       } else {
         if (_lockVisibilityCtrl.value != 1) {

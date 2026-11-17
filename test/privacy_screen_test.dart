@@ -1,34 +1,47 @@
-// import 'package:flutter_test/flutter_test.dart';
-// import 'package:privacy_screen/privacy_screen.dart';
-// import 'package:privacy_screen/privacy_screen_platform_interface.dart';
-// import 'package:privacy_screen/privacy_screen_method_channel.dart';
-// import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'dart:ui';
 
-// class MockPrivacyScreenPlatform
-//     with MockPlatformInterfaceMixin
-//     implements PrivacyScreenPlatform {
-//   @override
-//   Future<String?> getPlatformVersion() => Future.value('42');
+import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:privacy_screen/privacy_screen.dart';
+import 'package:privacy_screen/src/privacy_screen_method_channel.dart';
+import 'package:privacy_screen/src/privacy_screen_platform_interface.dart';
 
-//   @override
-//   Future enable() {
-//     // TODO: implement enable
-//     throw UnimplementedError();
-//   }
-// }
+class _FakePrivacyScreenPlatform
+    with MockPlatformInterfaceMixin
+    implements PrivacyScreenPlatform {
+  bool? result = true;
 
-// void main() {
-//   final PrivacyScreenPlatform initialPlatform = PrivacyScreenPlatform.instance;
+  @override
+  Future<bool?> updateConfig({
+    required PrivacyIosOptions iosOptions,
+    required PrivacyAndroidOptions androidOptions,
+    required Color backgroundColor,
+    required PrivacyBlurEffect blurEffect,
+  }) async {
+    return result;
+  }
+}
 
-//   test('$MethodChannelPrivacyScreen is the default instance', () {
-//     expect(initialPlatform, isInstanceOf<MethodChannelPrivacyScreen>());
-//   });
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-//   test('getPlatformVersion', () async {
-//     PrivacyScreen privacyScreenPlugin = PrivacyScreen();
-//     MockPrivacyScreenPlatform fakePlatform = MockPrivacyScreenPlatform();
-//     PrivacyScreenPlatform.instance = fakePlatform;
+  final initialPlatform = PrivacyScreenPlatform.instance;
 
-//     expect(await privacyScreenPlugin.getPlatformVersion(), '42');
-//   });
-// }
+  tearDown(() {
+    PrivacyScreenPlatform.instance = initialPlatform;
+  });
+
+  test('uses the method channel platform by default', () {
+    expect(initialPlatform, isA<MethodChannelPrivacyScreen>());
+  });
+
+  test('enable returns the native update result', () async {
+    final fakePlatform = _FakePrivacyScreenPlatform();
+    PrivacyScreenPlatform.instance = fakePlatform;
+
+    expect(await PrivacyScreen.instance.enable(), isTrue);
+
+    fakePlatform.result = false;
+    expect(await PrivacyScreen.instance.enable(), isFalse);
+  });
+}

@@ -1,3 +1,10 @@
+## 0.0.9 - Nov 17, 2026
+
+- Add Swift Package Manager support for iOS.
+- Keep CocoaPods support through the shared Swift implementation.
+- Apply current Dart and Flutter API migrations.
+- Transfer package maintenance metadata to Swypex.
+
 ## 0.0.8 - Aug 17, 2022
 
 - PR merged (not verified). Plugin is no longer maintained, use at own risk

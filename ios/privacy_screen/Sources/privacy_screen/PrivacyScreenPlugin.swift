@@ -1,7 +1,7 @@
 import Flutter
 import UIKit
 
-public class SwiftPrivacyScreenPlugin: NSObject, FlutterPlugin {
+public class PrivacyScreenPlugin: NSObject, FlutterPlugin {
     
     var enablePrivacy = false
     var lockWithDidEnterBackground = true
@@ -29,7 +29,7 @@ public class SwiftPrivacyScreenPlugin: NSObject, FlutterPlugin {
     }
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let instance = SwiftPrivacyScreenPlugin(registrar: registrar)
+        let instance = PrivacyScreenPlugin(registrar: registrar)
         registrar.addMethodCallDelegate(instance, channel: instance.methodChannel)
     }
     
