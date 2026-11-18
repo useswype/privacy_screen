@@ -1,3 +1,8 @@
+## 0.0.10 - Nov 18, 2026
+
+- Add UIScene lifecycle support for current Flutter iOS applications.
+- Preserve UIApplicationDelegate lifecycle support for older integrations.
+
 ## 0.0.9 - Nov 17, 2026
 
 - Add Swift Package Manager support for iOS.
